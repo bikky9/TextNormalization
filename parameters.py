@@ -27,6 +27,7 @@ parser.add_argument('-maxlen', type=int, default=None,help='Maximum source seque
 parser.add_argument('-correct_unique_mappings', action='store_true',default=False, help='Correct unique mappings before training')
 parser.add_argument('-char_model', type=str, help='Path to the pretrained char level model')
 parser.add_argument('-data_augm', action='store_true',default=False, help='Use data augmentation or not')
+parser.add_argument('-spell_data', action='store_true', default=False, help='Use spelling data')
 ## Model options
 parser.add_argument('-rnn_type', default='LSTM', choices=['LSTM', 'GRU'], help='Layer type  [LSTM|GRU]')
 parser.add_argument('-layers', type=int, default=1,help='Number of layers in the LSTM encoder/decoder')

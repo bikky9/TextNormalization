@@ -73,12 +73,30 @@ class DataLoader(object):
     def load_data(self, tweets):
         source_vocab = Dict(vocab_size=self.opt.vocab_size, bosWord=self.opt.bos, eosWord=self.opt.eos)
         target_vocab = Dict(vocab_size=self.opt.vocab_size, bosWord=self.opt.bos, eosWord=self.opt.eos)
+        # for test the mappings are predefined and for all other inputs except word level we dont need them, so no updates
+        update_mappings = not self.mappings and self.opt.input == 'word'
+        word_tweets = []
         if(self.opt.share_vocab):
             target_vocab = source_vocab
+        if (self.opt.input == 'spelling'):
+            if (self.opt.spell_data):
+                file = open('dataset/birkbeck.txt', 'r')
+                for line in file:
+                    l = line.split(':')
+                    oword = l[0]
+                    iwords = l[1].split()
+                    for iword in iwords:
+                        if iword and oword and iword.isalnum() and oword.isalnum():
+                            if iword == oword and len(iword) > 1 and len(oword) > 1 and not any(
+                                    c.isdigit() for c in iword) and not any(c.isdigit() for c in oword):
+                                if random.random() > 0.9 and not self.opt.data_augm:
+                                    continue
+                            iwordv, owordv = self.vector_repr(iword, oword, update_mappings)
+                            source_vocab.add_words(iwordv)
+                            target_vocab.add_words(owordv)
+                            tweet = Tweet(iwordv, owordv, -1, -1)
+                            word_tweets.append(copy.deepcopy(tweet))
         processor = Preprocessor()
-        #for test the mappings are predefined and for all other inputs except word level we dont need them, so no updates
-        update_mappings = not self.mappings and self.opt.input=='word'
-        word_tweets = []
         for tweet in tweets:
             inp_i, pos_i = processor.run(tweet.input,self.opt.lowercase)
             inp_o, pos_o = processor.run(tweet.output, self.opt.lowercase)
